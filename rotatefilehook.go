@@ -22,9 +22,9 @@ type RotateFileHook struct {
 }
 
 // NewRotateFileHook initialize a new logrus.Hook or return an error
-func NewRotateFileHook(config RotateFileConfig) (logrus.Hook, error) {
+func NewRotateFileHook(config RotateFileConfig) (*RotateFileHook, error) {
 
-	hook := RotateFileHook{
+	hook := &RotateFileHook{
 		Config: config,
 		LogWriter: &lumberjack.Logger{
 			Filename:   config.Filename,
@@ -34,7 +34,7 @@ func NewRotateFileHook(config RotateFileConfig) (logrus.Hook, error) {
 		},
 	}
 
-	return &hook, nil
+	return hook, nil
 }
 
 // Levels implements the Levels interface method of logrus Hook
