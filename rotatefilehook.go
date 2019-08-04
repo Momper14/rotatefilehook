@@ -1,12 +1,11 @@
 package rotatefilehook
 
 import (
-	"io"
-
 	"github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+// RotateFileConfig holds basic information for using lumberjack and logrus hooks
 type RotateFileConfig struct {
 	Filename   string
 	MaxSize    int
@@ -16,11 +15,13 @@ type RotateFileConfig struct {
 	Formatter  logrus.Formatter
 }
 
+// RotateFileHook holds hook information for logrus
 type RotateFileHook struct {
 	Config    RotateFileConfig
-	logWriter io.Writer
+	logWriter *lumberjack.Logger
 }
 
+// NewRotateFileHook initialize a new logrus.Hook or return an error
 func NewRotateFileHook(config RotateFileConfig) (logrus.Hook, error) {
 
 	hook := RotateFileHook{
@@ -36,15 +37,22 @@ func NewRotateFileHook(config RotateFileConfig) (logrus.Hook, error) {
 	return &hook, nil
 }
 
+// Levels implements the Levels interface method of logrus Hook
 func (hook *RotateFileHook) Levels() []logrus.Level {
 	return logrus.AllLevels[:hook.Config.Level+1]
 }
 
+// Fire implements the Fire interface method of logrus Hook
 func (hook *RotateFileHook) Fire(entry *logrus.Entry) (err error) {
 	b, err := hook.Config.Formatter.Format(entry)
 	if err != nil {
 		return err
 	}
-	hook.logWriter.Write(b)
-	return nil
+	_, err = hook.logWriter.Write(b)
+	return err
+}
+
+// Rotate by request a log file (calling of SIGHUP for example)
+func (hook *RotateFileHook) Rotate() error {
+	return hook.logWriter.Rotate()
 }
