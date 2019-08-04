@@ -18,7 +18,7 @@ type RotateFileConfig struct {
 // RotateFileHook holds hook information for logrus
 type RotateFileHook struct {
 	Config    RotateFileConfig
-	logWriter *lumberjack.Logger
+	LogWriter *lumberjack.Logger
 }
 
 // NewRotateFileHook initialize a new logrus.Hook or return an error
@@ -26,12 +26,12 @@ func NewRotateFileHook(config RotateFileConfig) (logrus.Hook, error) {
 
 	hook := RotateFileHook{
 		Config: config,
-	}
-	hook.logWriter = &lumberjack.Logger{
-		Filename:   config.Filename,
-		MaxSize:    config.MaxSize,
-		MaxBackups: config.MaxBackups,
-		MaxAge:     config.MaxAge,
+		LogWriter: &lumberjack.Logger{
+			Filename:   config.Filename,
+			MaxSize:    config.MaxSize,
+			MaxBackups: config.MaxBackups,
+			MaxAge:     config.MaxAge,
+		},
 	}
 
 	return &hook, nil
@@ -48,11 +48,11 @@ func (hook *RotateFileHook) Fire(entry *logrus.Entry) (err error) {
 	if err != nil {
 		return err
 	}
-	_, err = hook.logWriter.Write(b)
+	_, err = hook.LogWriter.Write(b)
 	return err
 }
 
 // Rotate by request a log file (calling of SIGHUP for example)
 func (hook *RotateFileHook) Rotate() error {
-	return hook.logWriter.Rotate()
+	return hook.LogWriter.Rotate()
 }
